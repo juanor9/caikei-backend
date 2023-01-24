@@ -1,6 +1,6 @@
 # CAIKEI BACKEND
 
-Backend para el "caikei", una aplicación para optimizar la gestión logística y financiera de pequeñas y medianas editoriales.
+Backend para "caikei", una aplicación para optimizar la gestión logística y financiera de pequeñas y medianas editoriales.
 
 ## Endpoints
 
@@ -14,5 +14,3 @@ Backend para el "caikei", una aplicación para optimizar la gestión logística 
     "email": "correo electrónico del usuario"
 }
 ```
-
-dasd
