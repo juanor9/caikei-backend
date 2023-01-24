@@ -6,7 +6,7 @@ Backend para "caikei", una aplicación para optimizar la gestión logística y f
 
 ### Usuarios
 
-- Para crear un usuario se envía una petición HTTP al endpoint `localhost:8080/api/users` con la información del nuevo usuario en el body:
+- Para crear un usuario se envía una petición HTTP al endpoint `/api/users` con la información del nuevo usuario en el body:
 ```json
 {
     "username": "nombre del usuario",
