@@ -4,7 +4,6 @@ import bcrypt from "bcryptjs";
 
 export interface UserDocument extends Document {
   role: "USER" | "ADMIN";
-  username: string;
   email: string;
   password: string;
   publishingHouses?: string[];
@@ -29,10 +28,6 @@ const UserSchema = new Schema(
       type: String,
       enum: ["USER", "ADMIN"],
       default: "USER",
-    },
-    username: {
-      type: String,
-      required: true,
     },
     email: {
       type: String,
@@ -74,10 +69,10 @@ UserSchema.pre("save", async function save(next: Function) {
 
 // Virtuals
 UserSchema.virtual('profile').get(function profile() {
-  const {_id, username, role, email} = this;
+  const {_id, role, email} = this;
 
   return {
-    _id, username, role, email
+    _id, role, email
   };
 
 });
@@ -91,7 +86,6 @@ async function comparePassword(
   const user = this;
 
   try {
-    console.log(candidatePassword, user.password);
     const match = await bcrypt.compare(candidatePassword, user.password);
 
     return match;
