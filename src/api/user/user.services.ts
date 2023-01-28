@@ -1,6 +1,7 @@
 import { DocumentDefinition, FilterQuery } from "mongoose";
 import User, { UserDocument } from "./user.model";
 
+
 // Create user
 export function createUser(
   user: DocumentDefinition<Omit<UserDocument, "createdAt" | "updatedAt">>
@@ -12,4 +13,10 @@ export function createUser(
 export function getUserFilter(filter: FilterQuery<UserDocument>) {
   const user = User.findOne(filter);
   return user;
+}
+
+// Update user
+export function updateUser(id: string, user: DocumentDefinition<Omit<UserDocument, 'createdAt' | 'updatedAt'>>) {
+  console.log('in updateUser');
+  return User.findByIdAndUpdate(id, user, {new: true});
 }

@@ -35,6 +35,7 @@ export function isAuthenticated(
   res: Response,
   next: NextFunction
 ) {
+  // console.log("isAuthenticated");
   const userToken = req.headers?.authorization?.split(" ")[1];
 
   if (!userToken) {
@@ -45,7 +46,7 @@ export function isAuthenticated(
   if (!decoded) {
     return res.status(401).json({ message: "token undecoded" });
   }
-
+  // console.log("decoded", decoded);
   next();
   return true;
 }

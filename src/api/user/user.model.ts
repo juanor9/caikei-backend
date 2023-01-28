@@ -53,6 +53,7 @@ const UserSchema = new Schema(
 
 //Middlewares
 UserSchema.pre("save", async function save(next: Function) {
+  console.log('in user.save');
   const user = this as UserDocument;
 
   try {
