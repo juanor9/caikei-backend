@@ -15,6 +15,9 @@ export async function handleLogin(
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+    //verify if user is active
+    if (user.isActive !== true)
+    {return res.status(401).json({ message: "User is not active" });}
 
     const validPassword = await user.comparePassword(password);
 

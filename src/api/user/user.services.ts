@@ -17,6 +17,5 @@ export function getUserFilter(filter: FilterQuery<UserDocument>) {
 
 // Update user
 export function updateUser(id: string, user: DocumentDefinition<Omit<UserDocument, 'createdAt' | 'updatedAt'>>) {
-  console.log('in updateUser');
   return User.findByIdAndUpdate(id, user, {new: true});
 }
