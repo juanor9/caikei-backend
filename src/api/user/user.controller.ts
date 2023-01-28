@@ -13,6 +13,9 @@ export async function handleCreateUser(req: Request, res: Response) {
     newUser.emailConfirmToken = hash;
     newUser.emailConfirmExpires = Date.now() + 3_600_000 * 48;
 
+    //temp
+    newUser.isActive = true;
+
     //Create user
     const user = await createUser(data);
 
@@ -39,7 +42,6 @@ export async function handleGetUser(req: Request, res: Response) {
 }
 
 export async function handleUpdateUser(req: Request, res: Response) {
-  console.log("in handleUpdateUser");
   const { id } = req.params;
   const data = req.body;
   try {
