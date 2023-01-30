@@ -6,7 +6,7 @@ export interface UserDocument extends Document {
   role: "USER" | "ADMIN";
   email: string;
   password: string;
-  publishingHouses?: string[];
+  publisher?: string;
 
   createdAt: Date;
   updatedAt: Date;
@@ -44,7 +44,7 @@ const UserSchema = new Schema(
     },
     passwordResetToken: String,
     passwordResetExpires: Date,
-    publishingHouses: [{ type: String }],
+    publisher:String,
   },
   {
     timestamps: true,
