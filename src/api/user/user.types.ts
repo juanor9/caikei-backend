@@ -4,6 +4,6 @@ export type userProfileType = {
     email: string;
     country: string;
     city: string;
-    publishingHouses: [string];
+    publisher: string;
   };
   
