@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { verifyToken } from "../../auth/auth.services";
-import { createPublisher } from "./publisher.services";
+import { createPublisher, getPublisherById, updatePublisher } from "./publisher.services";
 import { getUserById } from "../user/user.services";
 
 export async function handleCreatePublisher(req: Request, res: Response) {
@@ -41,4 +41,24 @@ export async function handleCreatePublisher(req: Request, res: Response) {
   } catch (error) {
     return res.status(500).json(error);
   }
+}
+
+export async function handleGetPublisherById(req: Request, res: Response){
+  const { id } = req.params;
+  const publisher = await getPublisherById(id);
+  if(!publisher){
+    return res.status(404).json({message: 'publisher not found'})
+  }
+  return res.status(200).json(publisher);
+}
+
+export async function handleUpdatePublisher(req: Request, res: Response) {
+  const { id } = req.params;
+  const data = req.body;
+
+  const publisher = await updatePublisher (id, data);
+  if (!publisher){
+    return res.status(404).json({message: 'Publisher not found'});
+  }
+  return res.status(200).json(publisher);
 }

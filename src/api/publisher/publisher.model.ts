@@ -27,7 +27,7 @@ const PublisherSchema = new Schema(
     name: {
       type: String,
       required: true,
-      capitalized: true,
+      capitalize: true,
     },
     publisherIds: [PublisherIdSchema],
     email: { type: String, required: true },

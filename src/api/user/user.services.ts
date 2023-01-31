@@ -17,7 +17,7 @@ export function getUserFilter(filter: FilterQuery<UserDocument>) {
 
 // get user by id
 export function getUserById(id: string) {
-  return User.findById(id);
+  return User.findById(id).populate("publisher");
 }
 
 // Update user

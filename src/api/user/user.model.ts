@@ -70,10 +70,10 @@ UserSchema.pre("save", async function save(next: Function) {
 
 // Virtuals
 UserSchema.virtual('profile').get(function profile() {
-  const {_id, role, email} = this;
+  const {_id, role, email, publisher} = this;
 
   return {
-    _id, role, email
+    _id, role, email, publisher
   };
 
 });
