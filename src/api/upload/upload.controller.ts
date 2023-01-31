@@ -6,7 +6,6 @@ export async function handleUploadSingle(
     req: Request, res: Response
 ){
     const {path, size} = req.file as Express.Multer.File;
-    console.log(req.file);
     const maxSize = 1024 *1024*2;
 
     if(size > maxSize){

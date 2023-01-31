@@ -12,8 +12,8 @@ async function uploadImage(image: string) {
     })
     console.log(result)
     return result;
-  } catch (error) {
-    console.log(error);
+  } catch (error: any) {
+    throw new Error(error)
   }
 }
 
