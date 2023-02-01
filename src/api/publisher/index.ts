@@ -8,13 +8,13 @@ import { isAuthenticated } from "../../auth/auth.services";
 
 const router = Router();
 
-// POST api/publisher -- create publisher --
+// POST api/publishers -- create publisher --
 router.post("/", isAuthenticated, handleCreatePublisher);
 
-// GET api/publisher/:id -- consult a publisher --
+// GET api/publishers/:id -- consult a publisher --
 router.get("/:id", isAuthenticated, handleGetPublisherById);
 
-// POST api/publisher/:id -- update a publisher --
+// PATCH api/publishers/:id -- update a publisher --
 router.patch("/:id", isAuthenticated, handleUpdatePublisher);
 
 export default router;
