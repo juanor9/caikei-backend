@@ -1,7 +1,7 @@
-import { Request, Response } from "express";
-import { verifyToken } from "../../auth/auth.services";
 import { createPublisher, getPublisherById, updatePublisher } from "./publisher.services";
 import { getUserById } from "../user/user.services";
+import { Request, Response } from "express";
+import { verifyToken } from "../../auth/auth.services";
 
 export async function handleCreatePublisher(req: Request, res: Response) {
   const data = req.body;
