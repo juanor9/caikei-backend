@@ -10,7 +10,6 @@ async function uploadImage(image: string) {
       use_filename: true,
       unique_filename: false,
     })
-    console.log(result)
     return result;
   } catch (error: any) {
     throw new Error(error)
