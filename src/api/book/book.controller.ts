@@ -53,7 +53,6 @@ export async function handleGetBookById(req: Request, res: Response) {
 export async function handleUpdateBook(req: Request, res: Response) {
   const { id } = req.params;
   const data = req.body;
-  console.log(data, id);
   try {
     const book = await updateBook(id, data);
 
