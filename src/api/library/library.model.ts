@@ -7,7 +7,7 @@ export interface LibraryDocument extends Document {
   city?: string;
   address?: string;
   phone?: string;
-  publishers?: object[];
+  publishers?: Object[];
 
   createdAt: Date;
   updatedAt: Date;
@@ -17,11 +17,12 @@ export interface LibraryDocument extends Document {
 
 const LibraryIdSchema = new Schema(
   {
-    type: { type: String, required: true },
-    number: { type: String, required: true },
+    type: { type: String},
+    number: { type: String},
   },
   { timestamps: true }
 );
+
 const PublishersSchema = new Schema(
   { publisherId: Types.ObjectId, 
     discount: Number }
@@ -38,7 +39,7 @@ const LibrarySchema = new Schema(
     city: String,
     address: String,
     phone: String,
-    publishers: [PublishersSchema]
+    publishers: [PublishersSchema],
   },
   { timestamps: true }
 );
