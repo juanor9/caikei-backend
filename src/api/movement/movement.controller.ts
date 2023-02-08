@@ -11,15 +11,16 @@ export async function HandleCreateMovement(req: Request, res: Response) {
   }
   const { kind, books, publisher } = newMovement;
 
-  // Set actions when movement is 'ingreso'
+  try {
+      // Set actions when movement is 'ingreso'
   if (kind === "ingreso") {
     books.map(async (book: { id: string; copies: number }) => {
       const { id, copies } = book;
-      try {
+
         // Get books in the movement from database
         const bookToMod = await getBookById(id);
         if (!bookToMod) {
-          return res.status(404).json({ message: "Book not found" });
+          return
         }
 
         // Get book inventory
@@ -32,7 +33,7 @@ export async function HandleCreateMovement(req: Request, res: Response) {
             copies,
           });
           bookToMod.save();
-          return bookToMod;
+          return 
         }
         // if items in inventory, check publisher's copies and add copies from movement
         if (inventory && inventory.length > 0) {
@@ -51,13 +52,65 @@ export async function HandleCreateMovement(req: Request, res: Response) {
             }
           });
         }
-      } catch (error) {
-        return res.status(500).json(error);
-      }
+    });
+  }
+  // Set actions when movement is 'remisión'
+  if (kind === "remisión" || kind === "devolución") {
+    const { from, to } = newMovement;
+    books.map(async (book: { id: string; copies: number }) => {
+      const { id, copies } = book;
+        // Get books in the movement from database
+        const bookToMod = await getBookById(id);
+        if (!bookToMod) {
+          return 
+        }
+
+        // Get book inventory
+        const inventory = bookToMod.inventory as inventoryDocument[];
+
+        // get books from storage
+        if (inventory && inventory.length > 0) {
+          const fromStorage = inventory.find(
+            (i) => i.placeId.toString() === from
+          );
+          if (!fromStorage) {
+            return 
+          }
+          const copiesAvailable = fromStorage.copies;
+          const copiesRequested = copies;
+          if (copiesRequested > copiesAvailable) {
+            return
+          }
+          fromStorage.copies = Number(copiesAvailable) - Number(copiesRequested);
+        }
+        // get books to storage
+        if (inventory && inventory.length > 0) {
+          const toStorage = inventory.find(
+            (i) => i.placeId.toString() === to
+          );
+          // if storage has not the book, add it directly
+          if (!toStorage) {
+            bookToMod.inventory = bookToMod.inventory?.concat({
+              placeId: to,
+              copies,
+            });
+
+            bookToMod.save();
+            return;
+          }
+          // if storage has the book, sum it
+          if(toStorage){
+            const copiesInStorage = toStorage.copies;
+            const newTotalCopies = Number(copiesInStorage) + Number(copies);
+            toStorage.copies = newTotalCopies;
+
+            bookToMod.save();
+            return
+          }
+        }
     });
   }
 
-  try {
     const movement = await createMovement(newMovement);
 
     return res.status(200).json(movement);
