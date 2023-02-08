@@ -6,6 +6,7 @@ import publisher from './api/publisher';
 import upload from './api/upload';
 import book from './api/book';
 import library from './api/library';
+import movement from './api/movement';
 
 function routes(app: Application):void{
     app.use('/api/books', book);
@@ -14,6 +15,7 @@ function routes(app: Application):void{
     app.use('/api/publishers', publisher);
     app.use('/api/upload', upload);
     app.use('/api/users', user);
+    app.use('/api/movements', movement);
     //auth routes
     app.use('/auth/local', authLocal);
 

@@ -1,4 +1,4 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 
 export interface BookDocument extends Document {
   title: string;
@@ -27,6 +27,8 @@ export interface BookDocument extends Document {
   updatedAt: Date;
 
   isActive?: Boolean;
+  inventory? : object[]
+  
 }
 
 const BookSchema = new Schema(
@@ -76,6 +78,11 @@ const BookSchema = new Schema(
     costCenter: String,
 
     isActive: Boolean,
+
+    inventory: [{
+      placeId: Types.ObjectId,
+      copies: Number
+    }]
   },
   {
     timestamps: true,
