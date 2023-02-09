@@ -6,24 +6,24 @@ export interface MovementDocument extends Document {
   kind: string;
   from?: string;
   to?: string;
-  books: Object[],
+  books: Object[];
   discount?: Number;
-  grossTotal?:Number;
+  grossTotal?: Number;
   netTotal?: Number;
-
+  createdBy: string;
 }
 
 const MovementSchema = new Schema(
   {
-    internalId:{
+    internalId: {
       type: Number,
       required: true,
     },
-    date:{
+    date: {
       type: Date,
       required: true,
     },
-    kind:{
+    kind: {
       type: String,
       required: true,
     },
@@ -33,24 +33,30 @@ const MovementSchema = new Schema(
     to: {
       type: [Types.ObjectId, String],
     },
-    books:[{
-      id: {
-        type: Types.ObjectId,
-        required: true,
+    books: [
+      {
+        id: {
+          type: Types.ObjectId,
+          required: true,
+        },
+        copies: {
+          type: Number,
+          required: true,
+        },
       },
-      copies:{
-        type: Number,
-        required: true,
-      }
-    }],
-    discount:Number,
+    ],
+    discount: Number,
     grossTotal: Number,
-    netTotal:Number,
+    netTotal: Number,
+    createdBy: {
+      type: Types.ObjectId,
+      required: true,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const Movement = model <MovementDocument>("Movement", MovementSchema);
+const Movement = model<MovementDocument>("Movement", MovementSchema);
 export default Movement;

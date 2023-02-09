@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
-import { createMovement } from "./movement.services";
+import { createMovement, getMovementsByPublisher } from "./movement.services";
 import { getBookById } from "../book/book.services";
 
 export async function HandleCreateMovement(req: Request, res: Response) {
@@ -150,4 +150,25 @@ export async function HandleCreateMovement(req: Request, res: Response) {
   } catch (error) {
     return res.status(500).json(error);
   }
+}
+
+export async function HandleGetMovementsByPublisher(
+  req: Request,
+  res: Response
+){
+  
+  const filter = req.query;
+  console.log(filter);
+  if(!filter){
+    return res.status(404).json({message: "no filter provided"})
+  }
+  try {
+    const movements = await getMovementsByPublisher(filter);
+
+    return res.status(200).json(movements)
+    
+  } catch (error) {
+    return res.status(500).json(error)
+  }
+
 }

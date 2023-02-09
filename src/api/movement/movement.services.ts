@@ -1,4 +1,4 @@
-import { DocumentDefinition } from "mongoose";
+import { DocumentDefinition, FilterQuery } from "mongoose";
 import Movement, { MovementDocument } from "./movement.model";
 
 // Create a new movement
@@ -9,3 +9,9 @@ export function createMovement(
 ) {
   return Movement.create(movement);
 }
+
+//get movements by publisher
+ export function getMovementsByPublisher(filter: FilterQuery<MovementDocument>){
+  const movements = Movement.find(filter);
+  return movements;
+ }
