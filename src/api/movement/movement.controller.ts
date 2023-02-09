@@ -12,15 +12,15 @@ export async function HandleCreateMovement(req: Request, res: Response) {
   const { kind, books, publisher } = newMovement;
 
   try {
-      // Set actions when movement is 'ingreso'
-  if (kind === "ingreso") {
-    books.map(async (book: { id: string; copies: number }) => {
-      const { id, copies } = book;
+    // Set actions when movement is 'ingreso'
+    if (kind === "ingreso") {
+      books.map(async (book: { id: string; copies: number }) => {
+        const { id, copies } = book;
 
         // Get books in the movement from database
         const bookToMod = await getBookById(id);
         if (!bookToMod) {
-          return
+          return;
         }
 
         // Get book inventory
@@ -33,7 +33,7 @@ export async function HandleCreateMovement(req: Request, res: Response) {
             copies,
           });
           bookToMod.save();
-          return 
+          return;
         }
         // if items in inventory, check publisher's copies and add copies from movement
         if (inventory && inventory.length > 0) {
@@ -52,17 +52,17 @@ export async function HandleCreateMovement(req: Request, res: Response) {
             }
           });
         }
-    });
-  }
-  // Set actions when movement is 'remisión'
-  if (kind === "remisión" || kind === "devolución") {
-    const { from, to } = newMovement;
-    books.map(async (book: { id: string; copies: number }) => {
-      const { id, copies } = book;
+      });
+    }
+    // Set actions when movement is 'remisión'
+    if (kind === "remisión" || kind === "devolución") {
+      const { from, to } = newMovement;
+      books.map(async (book: { id: string; copies: number }) => {
+        const { id, copies } = book;
         // Get books in the movement from database
         const bookToMod = await getBookById(id);
         if (!bookToMod) {
-          return 
+          return;
         }
 
         // Get book inventory
@@ -74,20 +74,19 @@ export async function HandleCreateMovement(req: Request, res: Response) {
             (i) => i.placeId.toString() === from
           );
           if (!fromStorage) {
-            return 
+            return;
           }
           const copiesAvailable = fromStorage.copies;
           const copiesRequested = copies;
           if (copiesRequested > copiesAvailable) {
-            return
+            return;
           }
-          fromStorage.copies = Number(copiesAvailable) - Number(copiesRequested);
+          fromStorage.copies =
+            Number(copiesAvailable) - Number(copiesRequested);
         }
         // get books to storage
         if (inventory && inventory.length > 0) {
-          const toStorage = inventory.find(
-            (i) => i.placeId.toString() === to
-          );
+          const toStorage = inventory.find((i) => i.placeId.toString() === to);
           // if storage has not the book, add it directly
           if (!toStorage) {
             bookToMod.inventory = bookToMod.inventory?.concat({
@@ -99,17 +98,51 @@ export async function HandleCreateMovement(req: Request, res: Response) {
             return;
           }
           // if storage has the book, sum it
-          if(toStorage){
+          if (toStorage) {
             const copiesInStorage = toStorage.copies;
             const newTotalCopies = Number(copiesInStorage) + Number(copies);
             toStorage.copies = newTotalCopies;
 
             bookToMod.save();
-            return
+            return;
           }
+          
         }
-    });
-  }
+      });
+    }
+    // Set actions when movement is 'liquidación'
+    if (kind === "liquidación") {
+      const { from, to } = newMovement;
+      books.map(async (book: { id: string; copies: number }) => {
+        const { id, copies } = book;
+        // Get books in the movement from database
+        const bookToMod = await getBookById(id);
+        if (!bookToMod) {
+          return;
+        }
+
+        // Get book inventory
+        const inventory = bookToMod.inventory as inventoryDocument[];
+
+        // get books from storage
+        if (inventory && inventory.length > 0) {
+          const fromStorage = inventory.find(
+            (i) => i.placeId.toString() === from
+          );
+          if (!fromStorage) {
+            return;
+          }
+          const copiesAvailable = fromStorage.copies;
+          const copiesRequested = copies;
+          if (copiesRequested > copiesAvailable) {
+            return;
+          }
+          fromStorage.copies =
+            Number(copiesAvailable) - Number(copiesRequested);
+            bookToMod.save();
+        }
+      });
+    }
 
     const movement = await createMovement(newMovement);
 
