@@ -8,6 +8,7 @@ export interface LibraryDocument extends Document {
   address?: string;
   phone?: string;
   publishers?: Object[];
+  discount?: number;
 
   createdAt: Date;
   updatedAt: Date;
@@ -40,6 +41,7 @@ const LibrarySchema = new Schema(
     address: String,
     phone: String,
     publishers: [PublishersSchema],
+    discount: Number,
   },
   { timestamps: true }
 );
