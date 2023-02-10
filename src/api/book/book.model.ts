@@ -9,12 +9,7 @@ export interface BookDocument extends Document {
   authors: string;
   thema?: string;
   topics?: string;
-  book_binding?:
-    | "rústica"
-    | "tapa dura"
-    | "grapa"
-    | "plegado/fanzine"
-    | "otros";
+  binding?:string;
   pages: number;
   height?: number;
   width?: number;
@@ -56,10 +51,8 @@ const BookSchema = new Schema(
     authors: String,
     thema: String,
     topics: String,
-    book_binding: {
+    binding: {
       type: String,
-      enum: ["rústica", "tapa dura", "grapa", "plegado/fanzine", "otros"],
-      default: "rústica",
     },
     pages: {
       type: Number,
@@ -70,10 +63,6 @@ const BookSchema = new Schema(
     awards: String,
     color: {
       type: String,
-      validate: {
-        validator: (value: string) => /^#[0-9A-F]{6}$/i.test(value),
-        message: "{VALUE} no es un color válido en formato hexadecimal",
-      },
     },
     costCenter: String,
 
