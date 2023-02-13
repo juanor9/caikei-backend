@@ -57,7 +57,6 @@ export async function HandleCreateMovement(req: Request, res: Response) {
     // Set actions when movement is 'remisión'
     if (kind === "remisión" || kind === "devolución") {
       const { from, to } = newMovement;
-      console.log(newMovement);
       books.map(async (book: { id: string; copies: number }) => {
         const { id, copies } = book;
         // Get books in the movement from database
@@ -68,7 +67,6 @@ export async function HandleCreateMovement(req: Request, res: Response) {
 
         // Get book inventory
         const inventory = bookToMod.inventory as inventoryDocument[];
-        console.log(inventory);
 
         // get books from storage
         if (inventory && inventory.length > 0) {
@@ -160,7 +158,6 @@ export async function HandleGetMovementsByPublisher(
 ){
   
   const filter = req.query;
-  console.log(filter);
   if(!filter){
     return res.status(404).json({message: "no filter provided"})
   }
