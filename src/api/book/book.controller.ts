@@ -22,7 +22,7 @@ export async function handleCreateBook(req: Request, res: Response) {
 }
 
 export async function handleGetBooksByFilter(req: Request, res: Response) {
-  const filter = req.params;
+  const filter = req.query;
   if (!filter) {
     return res.status(404).json({ message: "No filter provided" });
   }

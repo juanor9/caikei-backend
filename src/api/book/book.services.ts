@@ -1,5 +1,6 @@
 import { DocumentDefinition, FilterQuery } from "mongoose";
 import Book, { BookDocument } from "./book.model";
+import Library from "../library/library.model";
 
 // Create a new book
 export function createBook(
