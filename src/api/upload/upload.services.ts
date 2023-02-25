@@ -3,7 +3,7 @@ dotenv.config();
 
 const cloudinary = require('cloudinary').v2;
 
-async function uploadImage(image: string) {
+export async function uploadImage(image: string) {
   try {
     const result = await cloudinary.uploader.upload(image, {
       folder: 'dataFiles', // verificar luego
@@ -16,4 +16,21 @@ async function uploadImage(image: string) {
   }
 }
 
-export default uploadImage;
+export async function uploadXLSX(file: string){
+  try {
+    const result = await cloudinary.uploader.upload(file, 
+      {
+      folder: 'excelFiles',
+      use_filename: true,
+      unique_filename: false,
+      resource_type: "raw",
+      filename_override:`${file}.xlsx`,
+      }
+    );
+    return result;
+  } catch (error: any) {
+    console.log(error);
+    throw new Error(error);
+}
+}
+
