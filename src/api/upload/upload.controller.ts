@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import fs from 'fs';
-import uploadImage from './upload.services';
+import {uploadImage, uploadXLSX} from './upload.services';
+import * as XLSX from 'xlsx';
 
 export async function handleUploadSingle(
     req: Request, res: Response
@@ -15,6 +16,25 @@ export async function handleUploadSingle(
     try {
         const result = await uploadImage(path);
         res.json(result);
+    } catch (error:any) {
+        return res.status(500).json({message: error.message});
+    } finally{
+        fs.unlinkSync(path);
+    }
+}
+
+export async function handleUploadXlsx(
+    req: Request, res: Response
+){
+    const {path} = req.file as Express.Multer.File;
+
+    try {
+
+        const workbook = XLSX.readFile(path);
+        const worksheet = workbook.Sheets['Hoja1'];
+        const test = XLSX.utils.sheet_to_json(worksheet);
+
+        res.json(test);
     } catch (error:any) {
         return res.status(500).json({message: error.message});
     } finally{
