@@ -32,9 +32,9 @@ export async function handleUploadXlsx(
 
         const workbook = XLSX.readFile(path);
         const worksheet = workbook.Sheets['Hoja1'];
-        const test = XLSX.utils.sheet_to_json(worksheet);
+        const json = XLSX.utils.sheet_to_json(worksheet);
 
-        res.json(test);
+        res.json(json);
     } catch (error:any) {
         return res.status(500).json({message: error.message});
     } finally{
