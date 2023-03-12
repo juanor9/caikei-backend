@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
-import { createMovement, getMovementsByPublisher } from "./movement.services";
+import { 
+  createMovement, 
+  getMovementsByPublisher,
+  getMovementById, 
+} from "./movement.services";
 import { getBookById } from "../book/book.services";
 
 export async function HandleCreateMovement(req: Request, res: Response) {
@@ -171,3 +175,20 @@ export async function HandleGetMovementsByPublisher(
   }
 
 }
+
+export async function handleGetMovementById (
+  req: Request,
+  res: Response
+){
+  const { id } = req.params;
+  if (!id) {
+    return res.status(404).json({ message: "Movement not found" });
+  }
+
+  try {
+    const movement = await getMovementById(id);
+    return res.status(200).json(movement);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+};
