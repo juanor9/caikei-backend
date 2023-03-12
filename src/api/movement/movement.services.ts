@@ -15,3 +15,9 @@ export function createMovement(
   const movements = Movement.find(filter);
   return movements;
  }
+
+ // Get movement by id
+ export function getMovementById(id:string){
+  const movement = Movement.findById(id);
+  return movement;
+ }
