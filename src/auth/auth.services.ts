@@ -45,6 +45,7 @@ export function isAuthenticated(
   if (!decoded) {
     return res.status(401).json({ message: "token undecoded" });
   }
+  console.log('request authorized')
   next();
   return true;
 }

@@ -8,6 +8,7 @@ import book from './api/book';
 import library from './api/library';
 import movement from './api/movement';
 import creator from './api/creator';
+import email from './utils'
 
 function routes(app: Application):void{
     app.use('/api/books', book);
@@ -20,6 +21,8 @@ function routes(app: Application):void{
     app.use('/api/creators', creator);
     //auth routes
     app.use('/auth/local', authLocal);
+    // report errors
+    app.use('/email', email);
 
 }
   
