@@ -17,6 +17,7 @@ export interface UserDocument extends Document {
   emailConfirmToken?: String,
   emailConfirmExpires?: Date,
   isActive?:Boolean,
+  demoExpires?: Date,
 
   passwordResetToken?: String,
   passwordResetExpires?: Date,
@@ -44,6 +45,7 @@ const UserSchema = new Schema(
     },
     passwordResetToken: String,
     passwordResetExpires: Date,
+    demoExpires: Date,
     publisher:String,
   },
   {

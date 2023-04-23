@@ -9,12 +9,13 @@ export async function handleCreateUser(req: Request, res: Response) {
   const newUser = data;
   try {
     //Create email verification token
-    const hash = crypto.createHash("sha256").update(data.email).digest("hex");
-    newUser.emailConfirmToken = hash;
-    newUser.emailConfirmExpires = Date.now() + 3_600_000 * 48;
+    // const hash = crypto.createHash("sha256").update(data.email).digest("hex");
+    // newUser.emailConfirmToken = hash;
+    // newUser.emailConfirmExpires = Date.now() + 3_600_000 * 48;
 
     //temp
     newUser.isActive = true;
+    newUser.demoExpires = Date.now() + 3_600_000 * 24 * 30;
 
     //Create user
     const user = await createUser(data);
