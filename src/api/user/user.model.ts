@@ -1,4 +1,4 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 import { userProfileType } from "./user.types";
 import bcrypt from "bcryptjs";
 
@@ -7,6 +7,7 @@ export interface UserDocument extends Document {
   email: string;
   password: string;
   publisher?: string;
+  plan: string;
 
   createdAt: Date;
   updatedAt: Date;
@@ -14,21 +15,15 @@ export interface UserDocument extends Document {
   profile: userProfileType;
   comparePassword: (password: string) => Promise<boolean>;
 
-  emailConfirmToken?: String,
-  emailConfirmExpires?: Date,
-  isActive?:Boolean,
-  demoExpires?: Date,
-
-  passwordResetToken?: String,
-  passwordResetExpires?: Date,
+  isActive?: Boolean;
 }
 
 const UserSchema = new Schema(
   {
     role: {
       type: String,
-      enum: ["USER", "ADMIN"],
-      default: "USER",
+      enum: ["PUBLISHER", "ADMIN"],
+      default: "PUBLISHER",
     },
     email: {
       type: String,
@@ -36,17 +31,19 @@ const UserSchema = new Schema(
       unique: true,
       lowercase: true,
     },
-    emailConfirmToken: String,
-    emailConfirmExpires : Date,
-    isActive:Boolean,
+    isActive: Boolean,
     password: {
       type: String,
       required: true,
     },
     passwordResetToken: String,
     passwordResetExpires: Date,
-    demoExpires: Date,
-    publisher:String,
+    publisher: String,
+    plan: {
+      type: Types.ObjectId,
+      require: true,
+      default: '64e9fe7b113098ca3a9045f5',
+    },
   },
   {
     timestamps: true,
@@ -70,13 +67,16 @@ UserSchema.pre("save", async function save(next: Function) {
 });
 
 // Virtuals
-UserSchema.virtual('profile').get(function profile() {
-  const {_id, role, email, publisher} = this;
+UserSchema.virtual("profile").get(function profile() {
+  const { _id, role, email, publisher, plan } = this;
 
   return {
-    _id, role, email, publisher
+    _id,
+    role,
+    email,
+    publisher,
+    plan,
   };
-
 });
 
 //Methods

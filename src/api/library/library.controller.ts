@@ -36,9 +36,7 @@ export async function handleCreateLibrary(req: Request, res: Response) {
 
 export async function handleUpdateLibrary(req: Request, res: Response) {
   const { id } = req.params;
-  const data = req.body;
-  // console.log("🚀 ~ file: library.controller.ts:40 ~ handleUpdateLibrary ~ data:", data)
-  
+  const data = req.body;  
   
   try {
     if (data.publishers){
