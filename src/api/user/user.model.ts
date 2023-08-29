@@ -3,7 +3,7 @@ import { userProfileType } from "./user.types";
 import bcrypt from "bcryptjs";
 
 export interface UserDocument extends Document {
-  role: "USER" | "ADMIN";
+  role: "PUBLISHER" | "ADMIN";
   email: string;
   password: string;
   publisher?: string;
