@@ -5,5 +5,6 @@ export type userProfileType = {
     country: string;
     city: string;
     publisher: string;
+    plan: string;
   };
   

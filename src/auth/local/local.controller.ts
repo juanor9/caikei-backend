@@ -18,15 +18,6 @@ export async function handleLogin(
     //verify if user is active
     if (user.isActive !== true)
     {return res.status(401).json({ message: "User is not active" });}
-    // verify demo
-    if (user.demoExpires) {
-      const demoExpiresDate = new Date(user.demoExpires);
-      if (demoExpiresDate < new Date()) {
-        return res.status(401).json({ message: "Demo has expired" });
-      }
-    } else {
-      return res.status(401).json({ message: "Demo has expired" });
-    }
     
     // verify password
     const validPassword = await user.comparePassword(password);
