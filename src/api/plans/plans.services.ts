@@ -5,3 +5,8 @@ import Plan, { PlanDocument } from "./plans.model";
 export function getPlanById(id: String) {
   return Plan.findById(id);
 }
+
+// Get all plans
+export function getPlanAll() {
+  return Plan.find({});
+}
