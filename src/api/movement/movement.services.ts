@@ -21,3 +21,10 @@ export function createMovement(
   const movement = Movement.findById(id);
   return movement;
  }
+
+ // remove movement by id
+ export function deleteMovementById(id:string){
+  console.log("Deleting movement with ID:", id);
+  const movement = Movement.findByIdAndDelete(id);
+  return movement;
+ }
