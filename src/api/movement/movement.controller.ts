@@ -4,6 +4,7 @@ import {
   createMovement, 
   getMovementsByPublisher,
   getMovementById, 
+  deleteMovementById,
 } from "./movement.services";
 import { getBookById } from "../book/book.services";
 
@@ -192,3 +193,21 @@ export async function handleGetMovementById (
     return res.status(500).json(error);
   }
 };
+export async function handleDeleteMovementById(req: Request, res: Response) {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(404).json({ message: "Movement not found" });
+  }
+  try {
+    const deletedMovement = await deleteMovementById(id);
+    if (!deletedMovement) {
+      return res.status(404).json({ message: "Movement not found" });
+    }
+    return res
+      .status(200)
+      .json({ message: "Movement deleted", movement: deletedMovement });
+  } catch (error) {
+    console.error("Error deleting movement:", error);
+    return res.status(500).json(error);
+  }
+}
