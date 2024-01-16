@@ -11,13 +11,20 @@ export function createMovement(
 }
 
 //get movements by publisher
- export function getMovementsByPublisher(filter: FilterQuery<MovementDocument>){
+export function getMovementsByPublisher(filter: FilterQuery<MovementDocument>) {
   const movements = Movement.find(filter);
   return movements;
- }
+}
 
- // Get movement by id
- export function getMovementById(id:string){
+// Get movement by id
+export function getMovementById(id: string) {
   const movement = Movement.findById(id);
   return movement;
- }
+}
+
+// remove movement by id
+export function deleteMovementById(id: string) {
+  console.log("Deleting movement with ID:", id);
+  const movement = Movement.findByIdAndDelete(id);
+  return movement;
+}
