@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
-import { 
-  createMovement, 
+import {
+  createMovement,
   getMovementsByPublisher,
   getMovementById, 
   deleteMovementById,
@@ -111,7 +111,6 @@ export async function HandleCreateMovement(req: Request, res: Response) {
             bookToMod.save();
             return;
           }
-          
         }
       });
     }
@@ -144,7 +143,7 @@ export async function HandleCreateMovement(req: Request, res: Response) {
           }
           fromStorage.copies =
             Number(copiesAvailable) - Number(copiesRequested);
-            bookToMod.save();
+          bookToMod.save();
         }
       });
     }
@@ -160,27 +159,21 @@ export async function HandleCreateMovement(req: Request, res: Response) {
 export async function HandleGetMovementsByPublisher(
   req: Request,
   res: Response
-){
-  
+) {
   const filter = req.query;
-  if(!filter){
-    return res.status(404).json({message: "no filter provided"})
+  if (!filter) {
+    return res.status(404).json({ message: "no filter provided" });
   }
   try {
     const movements = await getMovementsByPublisher(filter);
 
-    return res.status(200).json(movements)
-    
+    return res.status(200).json(movements);
   } catch (error) {
-    return res.status(500).json(error)
+    return res.status(500).json(error);
   }
-
 }
 
-export async function handleGetMovementById (
-  req: Request,
-  res: Response
-){
+export async function handleGetMovementById(req: Request, res: Response) {
   const { id } = req.params;
   if (!id) {
     return res.status(404).json({ message: "Movement not found" });
@@ -193,6 +186,7 @@ export async function handleGetMovementById (
     return res.status(500).json(error);
   }
 };
+
 export async function handleDeleteMovementById(req: Request, res: Response) {
   const { id } = req.params;
   if (!id) {
@@ -210,4 +204,5 @@ export async function handleDeleteMovementById(req: Request, res: Response) {
     console.error("Error deleting movement:", error);
     return res.status(500).json(error);
   }
+
 }
