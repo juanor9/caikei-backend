@@ -8,6 +8,8 @@ export async function handleLogin(
   next: NextFunction
 ) {
   const { email, password } = req.body;
+  console.log("🚀 ~ password:", password)
+  console.log("🚀 ~ email:", email)
 
   try {
     const user = await getUserFilter({ email });

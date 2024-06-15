@@ -11,6 +11,7 @@ export function createUser(
 
 // Get user by filter
 export function getUserFilter(filter: FilterQuery<UserDocument>) {
+  console.log("🚀 ~ getUserFilter ~ filter:", filter)
   const user = User.findOne(filter);
   return user;
 }
