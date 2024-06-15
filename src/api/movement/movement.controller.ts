@@ -3,7 +3,7 @@ import { Types } from "mongoose";
 import {
   createMovement,
   getMovementsByPublisher,
-  getMovementById,
+  getMovementById, 
   deleteMovementById,
 } from "./movement.services";
 import { getBookById } from "../book/book.services";
@@ -185,7 +185,7 @@ export async function handleGetMovementById(req: Request, res: Response) {
   } catch (error) {
     return res.status(500).json(error);
   }
-}
+};
 
 export async function handleDeleteMovementById(req: Request, res: Response) {
   const { id } = req.params;
@@ -204,4 +204,5 @@ export async function handleDeleteMovementById(req: Request, res: Response) {
     console.error("Error deleting movement:", error);
     return res.status(500).json(error);
   }
+
 }

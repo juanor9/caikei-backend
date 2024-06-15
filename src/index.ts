@@ -5,7 +5,7 @@ import configDb from './config/database';
 import routes from './routes';
 
 dotenv.config();
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 8085;
 const app = express();
 
 // Set config file to express
