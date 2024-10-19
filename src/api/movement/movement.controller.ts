@@ -8,201 +8,212 @@ import {
 } from "./movement.services";
 import { getBookById } from "../book/book.services";
 
-export async function HandleCreateMovement(req: Request, res: Response) {
+
+export async function HandleCreateMovement(req: Request, res: Response): Promise<void> {
   const newMovement = req.body;
   interface inventoryDocument {
     placeId: Types.ObjectId;
     copies: number;
   }
-  const { kind, books, publisher } = newMovement;
+  const { kind, books, publisher, from, to } = newMovement;
 
   try {
     // Set actions when movement is 'ingreso'
     if (kind === "ingreso") {
-      books.map(async (book: { id: string; copies: number }) => {
+      if (!publisher) {
+        res.status(400).json({ message: "Publisher is required for ingreso movements" });
+        return;
+      }
+      for (const book of books) {
         const { id, copies } = book;
 
         // Get books in the movement from database
         const bookToMod = await getBookById(id);
         if (!bookToMod) {
-          return;
+          continue; // Si el libro no existe, se salta al siguiente
         }
 
-        // Get book inventory
-        const inventory = bookToMod.inventory as inventoryDocument[];
+        // Get or initialize book inventory
+        let inventory = bookToMod.inventory as inventoryDocument[] | undefined;
+        if (!inventory) {
+          inventory = [];
+          bookToMod.inventory = inventory;
+        }
 
         // if nothing in inventory, add it directly
-        if (inventory && inventory.length === 0) {
-          bookToMod.inventory = bookToMod.inventory?.concat({
+        const storage = inventory.find((i) => i.placeId.toString() === publisher);
+        if (storage) {
+          storage.copies += Number(copies);
+        } else {
+          inventory.push({
             placeId: publisher,
             copies,
           });
-          bookToMod.save();
-          return;
         }
-        // if items in inventory, check publisher's copies and add copies from movement
-        if (inventory && inventory.length > 0) {
-          const test = inventory.map((i) => {
-            const placeid = i.placeId.toString();
-            if (placeid === publisher) {
-              const previousCopies = i.copies;
-              const copiesToAdd = Number(copies);
-              const newCopies = previousCopies + copiesToAdd;
-              const storage = inventory.find((i) => placeid === publisher);
-              if (!storage) {
-                return;
-              }
-              storage.copies = newCopies;
-              bookToMod.save();
-            }
-          });
-        }
-      });
+
+        await bookToMod.save();
+      }
     }
-    // Set actions when movement is 'remisión'
+
+    // Set actions when movement is 'remisión' or 'devolución'
     if (kind === "remisión" || kind === "devolución") {
-      const { from, to } = newMovement;
-      books.map(async (book: { id: string; copies: number }) => {
+      if (!from || !to) {
+        res.status(400).json({ message: "'from' and 'to' are required for remisión or devolución movements" });
+        return;
+      }
+      for (const book of books) {
         const { id, copies } = book;
-        // Get books in the movement from database
         const bookToMod = await getBookById(id);
         if (!bookToMod) {
+          continue;
+        }
+
+        let inventory = bookToMod.inventory as inventoryDocument[] | undefined;
+        if (!inventory) {
+          res.status(400).json({ message: "Inventory not found for book" });
           return;
         }
 
-        // Get book inventory
-        const inventory = bookToMod.inventory as inventoryDocument[];
-
-        // get books from storage
-        if (inventory && inventory.length > 0) {
-          const fromStorage = inventory.find(
-            (i) => i.placeId.toString() === from
-          );
-          if (!fromStorage) {
-            return;
-          }
-          const copiesAvailable = fromStorage.copies;
-          const copiesRequested = copies;
-          if (copiesRequested > copiesAvailable) {
-            return;
-          }
-          fromStorage.copies =
-            Number(copiesAvailable) - Number(copiesRequested);
+        // Remove copies from `from` storage
+        const fromStorage = inventory.find((i) => i.placeId.toString() === from);
+        if (!fromStorage || fromStorage.copies < copies) {
+          continue;
         }
-        // get books to storage
-        if (inventory && inventory.length > 0) {
-          const toStorage = inventory.find((i) => i.placeId.toString() === to);
-          // if storage has not the book, add it directly
-          if (!toStorage) {
-            bookToMod.inventory = bookToMod.inventory?.concat({
-              placeId: to,
-              copies,
-            });
+        fromStorage.copies -= copies;
 
-            bookToMod.save();
-            return;
-          }
-          // if storage has the book, sum it
-          if (toStorage) {
-            const copiesInStorage = toStorage.copies;
-            const newTotalCopies = Number(copiesInStorage) + Number(copies);
-            toStorage.copies = newTotalCopies;
-
-            bookToMod.save();
-            return;
-          }
+        // Add copies to `to` storage
+        let toStorage = inventory.find((i) => i.placeId.toString() === to);
+        if (!toStorage) {
+          inventory.push({
+            placeId: to,
+            copies,
+          });
+        } else {
+          toStorage.copies += copies;
         }
-      });
+
+        await bookToMod.save();
+      }
     }
+
     // Set actions when movement is 'liquidación'
     if (kind === "liquidación") {
-      const { from, to } = newMovement;
-      books.map(async (book: { id: string; copies: number }) => {
+      if (!from) {
+        res.status(400).json({ message: "'from' is required for liquidación movements" });
+        return;
+      }
+      for (const book of books) {
         const { id, copies } = book;
-        // Get books in the movement from database
         const bookToMod = await getBookById(id);
         if (!bookToMod) {
+          continue;
+        }
+
+        let inventory = bookToMod.inventory as inventoryDocument[] | undefined;
+        if (!inventory) {
+          res.status(400).json({ message: "Inventory not found for book" });
           return;
         }
 
-        // Get book inventory
-        const inventory = bookToMod.inventory as inventoryDocument[];
-
-        // get books from storage
-        if (inventory && inventory.length > 0) {
-          const fromStorage = inventory.find(
-            (i) => i.placeId.toString() === from
-          );
-          if (!fromStorage) {
-            return;
-          }
-          const copiesAvailable = fromStorage.copies;
-          const copiesRequested = copies;
-          if (copiesRequested > copiesAvailable) {
-            return;
-          }
-          fromStorage.copies =
-            Number(copiesAvailable) - Number(copiesRequested);
-          bookToMod.save();
+        // Remove copies from `from` storage
+        const fromStorage = inventory.find((i) => i.placeId.toString() === from);
+        if (fromStorage && fromStorage.copies >= copies) {
+          fromStorage.copies -= copies;
         }
-      });
+
+        await bookToMod.save();
+      }
     }
 
     const movement = await createMovement(newMovement);
 
-    return res.status(200).json(movement);
+    // Enviar respuesta sin retornar explícitamente
+    res.status(200).json(movement);
   } catch (error) {
-    return res.status(500).json(error);
+    res.status(500).json(error);
   }
 }
 
 export async function HandleGetMovementsByPublisher(
   req: Request,
   res: Response
-) {
+): Promise<void> {
   const filter = req.query;
-  if (!filter) {
-    return res.status(404).json({ message: "no filter provided" });
-  }
-  try {
-    const movements = await getMovementsByPublisher(filter);
 
-    return res.status(200).json(movements);
+  // Verificar si el filtro está vacío
+  if (!filter || Object.keys(filter).length === 0) {
+    res.status(400).json({ message: "No filter provided" });
+    return;
+  }
+
+  try {
+    // Ajustar el filtro al tipo esperado por el servicio
+    const validFilter: any = {};
+
+    // Aquí puedes validar qué propiedades esperas, por ejemplo:
+    if (filter.publisher) {
+      validFilter.publisher = filter.publisher;
+    }
+    if (filter.kind) {
+      validFilter.kind = filter.kind;
+    }
+    // Añadir cualquier otro filtro específico que necesites
+
+    const movements = await getMovementsByPublisher(validFilter);
+
+    res.status(200).json(movements);
   } catch (error) {
-    return res.status(500).json(error);
+    res.status(500).json({ message: "An error occurred while fetching movements", error });
   }
 }
 
-export async function handleGetMovementById(req: Request, res: Response) {
+export async function handleGetMovementById(req: Request, res: Response): Promise<void> {
   const { id } = req.params;
-  if (!id) {
-    return res.status(404).json({ message: "Movement not found" });
+
+  // Validar que el ID es un ObjectId válido
+  if (!id || !Types.ObjectId.isValid(id)) {
+    res.status(400).json({ message: "Invalid or missing movement ID" });
+    return;
   }
 
   try {
     const movement = await getMovementById(id);
-    return res.status(200).json(movement);
-  } catch (error) {
-    return res.status(500).json(error);
-  }
-};
 
-export async function handleDeleteMovementById(req: Request, res: Response) {
-  const { id } = req.params;
-  if (!id) {
-    return res.status(404).json({ message: "Movement not found" });
+    // Si no se encuentra el movimiento, devolver un 404
+    if (!movement) {
+      res.status(404).json({ message: "Movement not found" });
+      return;
+    }
+
+    res.status(200).json(movement);
+  } catch (error) {
+    res.status(500).json({ message: "An error occurred while fetching the movement", error });
   }
+}
+
+export async function handleDeleteMovementById(req: Request, res: Response): Promise<void> {
+  const { id } = req.params;
+
+  // Validar que el ID es un ObjectId válido
+  if (!id || !Types.ObjectId.isValid(id)) {
+    res.status(400).json({ message: "Invalid or missing movement ID" });
+    return;
+  }
+
   try {
     const deletedMovement = await deleteMovementById(id);
+
+    // Si el movimiento no se encuentra, devolver un 404
     if (!deletedMovement) {
-      return res.status(404).json({ message: "Movement not found" });
+      res.status(404).json({ message: "Movement not found" });
+      return;
     }
-    return res
-      .status(200)
-      .json({ message: "Movement deleted", movement: deletedMovement });
+
+    // Si se elimina exitosamente, devolver un mensaje de éxito
+    res.status(200).json({ message: "Movement deleted", movement: deletedMovement });
   } catch (error) {
     console.error("Error deleting movement:", error);
-    return res.status(500).json(error);
+    res.status(500).json({ message: "An error occurred while deleting the movement", error });
   }
-
 }
+

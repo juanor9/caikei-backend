@@ -2,78 +2,144 @@ import { createPublisher, getPublisherById, updatePublisher, getPublisherFilter 
 import { getUserById } from "../user/user.services";
 import { Request, Response } from "express";
 import { verifyToken } from "../../auth/auth.services";
+import { Types } from "mongoose";
 
-export async function handleCreatePublisher(req: Request, res: Response) {
+export async function handleCreatePublisher(req: Request, res: Response): Promise<void> {
   const data = req.body;
-  const newPublisher = data;
-  const userToken = req.headers?.authorization?.split(" ")[1] as string;
+  const userToken = req.headers?.authorization?.split(" ")[1];
 
   try {
-    // check user id from token
+    // Verificar el token de usuario
     if (!userToken) {
-      return res
-        .status(401)
-        .json({ message: "You are not authorized to create a publisher" });
+      res.status(401).json({ message: "You are not authorized to create a publisher" });
+      return;
     }
-    const decoded = verifyToken(userToken) as {
-      _id: string;
-      role: string;
-      email: string;
-      iat: number;
+
+    // Decodificar el token, asegurándose de manejar el caso en que el token sea inválido
+    let decoded;
+    try {
+      decoded = verifyToken(userToken);
+    } catch (error) {
+      res.status(401).json({ message: "Invalid token" });
+      return;
+    }
+
+    // Verificar que el token decodificado tiene la estructura esperada
+    if (
+      !decoded ||
+      typeof decoded !== "object" ||
+      !("_id" in decoded) ||
+      typeof (decoded as any)._id !== "string"
+    ) {
+      res.status(401).json({ message: "Invalid token data" });
+      return;
+    }
+
+    const { _id } = decoded as { _id: string };
+
+    // Activar el publisher
+    const newPublisher = {
+      ...data,
+      isActive: true,
     };
-    // activate publisher
-    newPublisher.isActive = true;
-    // create publisher
-    const publisher = await createPublisher(data);
 
-    //get user
-    const user = await getUserById(decoded._id);
+    // Crear el publisher
+    const publisher = await createPublisher(newPublisher);
+
+    // Obtener el usuario
+    const user = await getUserById(_id);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      res.status(404).json({ message: "User not found" });
+      return;
     }
-    // add publisher to user
-    user.publisher = publisher._id;
 
-    user.save();
+    // Asegurarse de convertir `publisher._id` a string antes de asignarlo
+    user.publisher = String(publisher._id);
+    await user.save(); // Asegurar que se espere al guardado
+
+    // Devolver la respuesta
     const returnData = { publisher, user };
-
-    return res.status(200).json(returnData);
+    res.status(200).json(returnData);
   } catch (error) {
-    return res.status(500).json(error);
+    res.status(500).json({ message: "An error occurred while creating the publisher", error });
   }
 }
 
-export async function handleGetPublisherById(req: Request, res: Response){
+export async function handleGetPublisherById(req: Request, res: Response): Promise<void> {
   const { id } = req.params;
-  const publisher = await getPublisherById(id);
-  if(!publisher){
-    return res.status(404).json({message: 'publisher not found'})
+
+  // Validar que el ID es un ObjectId válido
+  if (!id || !Types.ObjectId.isValid(id)) {
+    res.status(400).json({ message: "Invalid or missing publisher ID" });
+    return;
   }
-  return res.status(200).json(publisher);
+
+  try {
+    const publisher = await getPublisherById(id);
+
+    // Si no se encuentra el publisher, devolver un 404
+    if (!publisher) {
+      res.status(404).json({ message: "Publisher not found" });
+      return;
+    }
+
+    // Devolver el publisher encontrado
+    res.status(200).json(publisher);
+  } catch (error) {
+    // Manejar cualquier error durante la operación
+    res.status(500).json({ message: "An error occurred while fetching the publisher", error });
+  }
 }
 
-export async function handleGetPublisherByFilter(req: Request, res: Response){
+export async function handleGetPublisherByFilter(req: Request, res: Response): Promise<void> {
   const filter = req.query;
-  
-  if (!filter) {
-    return res.status(404).json({ message: "No filter provided" });
+
+  // Verificar si el filtro está vacío
+  if (!filter || Object.keys(filter).length === 0) {
+    res.status(400).json({ message: "No filter provided" });
+    return;
   }
+
   try {
     const publisher = await getPublisherFilter(filter);
-    // console.log(publisher);
-    return res.status(200).json(publisher);
+
+    // Si no se encuentra ningún publisher, devolver un array vacío
+    if (!publisher || (Array.isArray(publisher) && publisher.length === 0)) {
+      res.status(404).json({ message: "No publisher found with the given filter" });
+      return;
+    }
+
+    // Devolver el/los publisher(s) encontrados
+    res.status(200).json(publisher);
   } catch (error) {
-    return res.status(500).json(error);
+    res.status(500).json({ message: "An error occurred while fetching the publisher(s)", error });
   }
 }
 
-export async function handleUpdatePublisher(req: Request, res: Response) {
+export async function handleUpdatePublisher(req: Request, res: Response): Promise<void> {
   const { id } = req.params;
   const data = req.body;
 
-  const publisher = await updatePublisher (id, data);
-  if (!publisher){
-    return res.status(404).json({message: 'Publisher not found'});
+  // Validar que el ID es un ObjectId válido
+  if (!id || !Types.ObjectId.isValid(id)) {
+    res.status(400).json({ message: "Invalid or missing publisher ID" });
+    return;
   }
-  return res.status(200).json(publisher);
+
+  try {
+    // Actualizar el publisher con los datos proporcionados
+    const publisher = await updatePublisher(id, data);
+
+    // Si el publisher no se encuentra, devolver un error 404
+    if (!publisher) {
+      res.status(404).json({ message: "Publisher not found" });
+      return;
+    }
+
+    // Devolver el publisher actualizado
+    res.status(200).json(publisher);
+  } catch (error) {
+    // Manejar cualquier error durante la operación
+    res.status(500).json({ message: "An error occurred while updating the publisher", error });
+  }
 }

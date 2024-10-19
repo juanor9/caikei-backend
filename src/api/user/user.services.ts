@@ -1,11 +1,11 @@
-import { DocumentDefinition, FilterQuery } from "mongoose";
+import { FilterQuery } from "mongoose";
 import User, { UserDocument } from "./user.model";
-
+import { HydratedDocument } from "mongoose"; // Importar el tipo adecuado
 
 // Create user
 export function createUser(
-  user: DocumentDefinition<Omit<UserDocument, "createdAt" | "updatedAt">>
-) {
+  user: Omit<UserDocument, "createdAt" | "updatedAt">
+): Promise<HydratedDocument<UserDocument>> {
   return User.create(user);
 }
 
@@ -16,12 +16,15 @@ export function getUserFilter(filter: FilterQuery<UserDocument>) {
   return user;
 }
 
-// get user by id
+// Get user by id
 export function getUserById(id: string) {
   return User.findById(id).populate("publisher");
 }
 
 // Update user
-export function updateUser(id: string, user: DocumentDefinition<Omit<UserDocument, 'createdAt' | 'updatedAt'>>) {
-  return User.findByIdAndUpdate(id, user, {new: true});
+export function updateUser(
+  id: string,
+  user: Omit<UserDocument, "createdAt" | "updatedAt">
+) {
+  return User.findByIdAndUpdate(id, user, { new: true });
 }

@@ -1,11 +1,9 @@
-import { DocumentDefinition, FilterQuery } from "mongoose";
+import { InferSchemaType, FilterQuery } from "mongoose";
 import Movement, { MovementDocument } from "./movement.model";
 
 // Create a new movement
 export function createMovement(
-  movement: DocumentDefinition<
-    Omit<MovementDocument, "createdAt" | "updatedAt">
-  >
+  movement: InferSchemaType<typeof Movement>
 ) {
   return Movement.create(movement);
 }

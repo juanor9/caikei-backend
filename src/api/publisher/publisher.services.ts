@@ -1,17 +1,15 @@
-import { DocumentDefinition, FilterQuery } from "mongoose";
+import { FilterQuery, HydratedDocument } from "mongoose";
 import Publisher, { PublisherDocument } from "./publisher.model";
 
 // Create a new publisher
 export function createPublisher(
-  publisher: DocumentDefinition<
-    Omit<PublisherDocument, "createdAt" | "updatedAt">
-  >
-) {
+  publisher: Omit<PublisherDocument, "createdAt" | "updatedAt">
+): Promise<HydratedDocument<PublisherDocument>> {
   return Publisher.create(publisher);
 }
 
 // Get a publisher by its ID
-export function getPublisherById(id: String) {
+export function getPublisherById(id: string) {
   return Publisher.findById(id);
 }
 
@@ -23,10 +21,8 @@ export async function getPublisherFilter(filter: FilterQuery<PublisherDocument>)
 
 // Update a publisher by its ID
 export function updatePublisher(
-  id: String,
-  publisher: DocumentDefinition<
-    Omit<PublisherDocument, "createdAt" | "updatedAt">
-  >
+  id: string,
+  publisher: Omit<PublisherDocument, "createdAt" | "updatedAt">
 ) {
   return Publisher.findByIdAndUpdate(id, publisher, { new: true });
 }

@@ -6,35 +6,48 @@ export async function handleLogin(
   req: Request,
   res: Response,
   next: NextFunction
-) {
+): Promise<void> {
   const { email, password } = req.body;
-  console.log("🚀 ~ password:", password)
-  console.log("🚀 ~ email:", email)
+
+  if (!email || !password) {
+    res.status(400).json({ message: "Email and password are required" });
+    return;
+  }
 
   try {
     const user = await getUserFilter({ email });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      res.status(404).json({ message: "User not found" });
+      return;
     }
-    //verify if user is active
-    if (user.isActive !== true)
-    {return res.status(401).json({ message: "User is not active" });}
-    
-    // verify password
-    const validPassword = await user.comparePassword(password);
+
+    // Verificar si el usuario está activo
+    if (user.isActive !== true) {
+      res.status(401).json({ message: "User is not active" });
+      return;
+    }
+
+    // Verificar la contraseña
+    let validPassword;
+    try {
+      validPassword = await user.comparePassword(password);
+    } catch (err) {
+      res.status(500).json({ message: "Error verifying password" });
+      return;
+    }
 
     if (!validPassword) {
-      return res.status(401).json({ message: "Invalid password" });
+      res.status(401).json({ message: "Invalid password" });
+      return;
     }
 
-    //JWT
+    // Crear el JWT
     const jwtPayload = user.profile;
-
     const userToken = signToken(jwtPayload);
 
-    return res.status(200).json({ profile: user.profile, userToken });
-  } catch (error) {
-    return res.status(500).json(error);
+    res.status(200).json({ profile: user.profile, userToken });
+  } catch (error: any) {
+    res.status(500).json({ message: "An error occurred during login", error: error.message });
   }
 }

@@ -34,20 +34,23 @@ export function isAuthenticated(
   req: Request,
   res: Response,
   next: NextFunction
-) {
+): void {
   const userToken = req.headers?.authorization?.split(" ")[1];
 
   if (!userToken) {
-    return res.status(401).json({ message: "invalid user token" });
+    res.status(401).json({ message: "Invalid user token" });
+    return; // Asegúrate de detener la ejecución aquí
   }
+
   const decoded = verifyToken(userToken);
 
   if (!decoded) {
-    return res.status(401).json({ message: "token undecoded" });
+    res.status(401).json({ message: "Token undecoded" });
+    return; // Asegúrate de detener la ejecución aquí
   }
-  console.log('request authorized')
-  next();
-  return true;
+
+  console.log('Request authorized');
+  next();  // Continúa al siguiente middleware/controlador
 }
 
 // Get user by id from token

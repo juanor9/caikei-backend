@@ -13,8 +13,8 @@ export async function handleSendReport (req: Request, res: Response) {
       html: JSON.stringify(data),
     }
     await sendNodeMailer(emailData);
-    return res.status(201).json(emailData);
+    res.status(201).json(emailData);
   } catch (error:any) {
-    return res.status(500).json(error.message);
+    res.status(500).json(error.message);
   }
 };
